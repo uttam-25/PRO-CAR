@@ -6,7 +6,6 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -170,32 +169,42 @@ export default function DamageReportScreen({ route }) {
               {(item.confidenceScore !== undefined || item.confidence !== undefined) && (
                 <ConfidenceBar confidence={item.confidenceScore ?? item.confidence} />
               )}
+            </View>
+          ))}
+        </View>
+      )}
 
-              {/* Side by side images */}
-              {(item.beforeImage || item.afterImage) && (
-                <View style={styles.imageRow}>
-                  {item.beforeImage && (
-                    <View style={styles.imageCol}>
-                      <Text style={styles.imageLabel}>Before</Text>
-                      <Image
-                        source={{ uri: getBeforeUrl(item.beforeImage) }}
-                        style={styles.compImage}
-                        resizeMode="cover"
-                      />
-                    </View>
-                  )}
-                  {item.afterImage && (
-                    <View style={styles.imageCol}>
-                      <Text style={styles.imageLabel}>After (annotated)</Text>
-                      <Image
-                        source={{ uri: getAnnotatedUrl(item.afterImage) }}
-                        style={styles.compImage}
-                        resizeMode="cover"
-                      />
-                    </View>
-                  )}
-                </View>
+      {/* Before / After Image Comparison — driven by report.annotatedImages */}
+      {Array.isArray(report.annotatedImages) && report.annotatedImages.length > 0 && (
+        <View style={styles.card}>
+          <View style={styles.cardTitleRow}>
+            <MaterialCommunityIcons name="compare" size={20} color={Colors.aqua} />
+            <Text style={styles.cardTitle}>Before &amp; After Comparison</Text>
+          </View>
+          {report.annotatedImages.map((img, index) => (
+            <View key={index} style={styles.comparisonBlock}>
+              <Text style={styles.comparisonIndex}>Image pair {index + 1}</Text>
+              {img.madScore !== undefined && (
+                <Text style={styles.madScore}>Difference score (MAD): {img.madScore}</Text>
               )}
+              <View style={styles.imageRow}>
+                <View style={styles.imageCol}>
+                  <Text style={styles.imageLabel}>Before</Text>
+                  <Image
+                    source={{ uri: getBeforeUrl(img.originalFilename) }}
+                    style={styles.compImage}
+                    resizeMode="cover"
+                  />
+                </View>
+                <View style={styles.imageCol}>
+                  <Text style={styles.imageLabel}>After (annotated)</Text>
+                  <Image
+                    source={{ uri: getAnnotatedUrl('annotated_' + img.originalFilename) }}
+                    style={styles.compImage}
+                    resizeMode="cover"
+                  />
+                </View>
+              </View>
             </View>
           ))}
         </View>
@@ -289,6 +298,14 @@ const styles = StyleSheet.create({
   imageLabel: { color: Colors.textLight, fontSize: 11, marginBottom: 4, textAlign: 'center' },
   compImage: { width: '100%', height: 120, borderRadius: 8, borderWidth: 1, borderColor: Colors.oceanBlue },
   summaryBodyText: { color: Colors.cloudWhite, fontSize: 14, lineHeight: 20 },
+  comparisonBlock: {
+    borderTopWidth: 1,
+    borderTopColor: '#1E3A52',
+    paddingTop: 14,
+    marginTop: 14,
+  },
+  comparisonIndex: { color: Colors.cloudWhite, fontSize: 13, fontWeight: '600', marginBottom: 4 },
+  madScore: { color: Colors.textLight, fontSize: 12, marginBottom: 8 },
   disclaimerBox: {
     flexDirection: 'row',
     gap: 8,
