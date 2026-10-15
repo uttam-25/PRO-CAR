@@ -72,7 +72,7 @@ export default function InspectionHistoryScreen({ navigation }) {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate('InspectionDetailScreen', { inspectionId: item._id })}
+        onPress={() => navigation.navigate('InspectionDetailScreen', { inspectionId: item.inspectionId })}
         activeOpacity={0.8}
       >
         <View style={styles.cardHeader}>

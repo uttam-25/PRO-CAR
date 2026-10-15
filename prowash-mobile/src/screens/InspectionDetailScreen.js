@@ -29,9 +29,12 @@ function formatDateTime(dateStr) {
   return `${day}/${mo}/${y} ${h}:${mi}:${s}`;
 }
 
-function MediaThumbnail({ item, baseUrl }) {
+function MediaThumbnail({ item, baseUrl, inspectionId, phase }) {
   const isVideo = item.type === 'video' || (item.filename && item.filename.match(/\.(mp4|mov|avi|mkv)$/i));
-  const uri = item.uri || (item.filename ? `${baseUrl}/api/uploads/${item.filename}` : null);
+  // Build URL from inspectionId + phase + filename (matches backend storage path)
+  const uri = item.uri || (item.filename && inspectionId && phase
+    ? `${baseUrl}/api/uploads/${phase}/${inspectionId}/${item.filename}`
+    : null);
   return (
     <View style={styles.thumbnailContainer}>
       {isVideo ? (
@@ -189,7 +192,7 @@ export default function InspectionDetailScreen({ route, navigation }) {
             <Text style={styles.mediaLabel}>Before Inspection Media</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {inspection.beforeMedia.map((item, i) => (
-                <MediaThumbnail key={i} item={item} baseUrl={BASE_URL} />
+                <MediaThumbnail key={i} item={item} baseUrl={BASE_URL} inspectionId={inspectionId} phase="before" />
               ))}
             </ScrollView>
           </View>
@@ -228,7 +231,7 @@ export default function InspectionDetailScreen({ route, navigation }) {
                 <Text style={styles.mediaLabel}>Return Media (uploaded)</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {inspection.afterMedia.map((item, i) => (
-                    <MediaThumbnail key={i} item={item} baseUrl={BASE_URL} />
+                    <MediaThumbnail key={i} item={item} baseUrl={BASE_URL} inspectionId={inspectionId} phase="after" />
                   ))}
                 </ScrollView>
               </View>

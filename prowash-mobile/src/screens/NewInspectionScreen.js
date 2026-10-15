@@ -140,7 +140,7 @@ export default function NewInspectionScreen({ navigation }) {
     setLoading(true);
     try {
       const res = await api.createInspection(vehicleModel.trim(), customerName.trim());
-      const inspectionId = res.data?.data?._id || res.data?._id;
+      const inspectionId = res.data?.inspectionId;
       if (!inspectionId) throw new Error('No inspection ID returned');
 
       if (media.length > 0) {

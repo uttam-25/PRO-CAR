@@ -94,11 +94,11 @@ export default function DamageReportScreen({ route }) {
     );
   }
 
-  // Image URL helpers
+  // Image URL helpers — files are stored under uploads/<phase>/<inspectionId>/<filename>
   const getBeforeUrl = (filename) =>
-    filename ? `${BASE_URL}/api/uploads/${filename}` : null;
+    filename ? `${BASE_URL}/api/uploads/before/${report.inspectionId}/${filename}` : null;
   const getAnnotatedUrl = (filename) =>
-    filename ? `${BASE_URL}/api/uploads/annotated_${filename}` : null;
+    filename ? `${BASE_URL}/api/uploads/after/${report.inspectionId}/${filename}` : null;
 
   const damages = report.damages || report.damageItems || [];
   const noDamage = report.noDamageDetected || (damages.length === 0 && !report.warningMessage);
@@ -167,7 +167,9 @@ export default function DamageReportScreen({ route }) {
                 {item.location || 'N/A'}
               </Text>
               {item.description ? <Text style={styles.damageDesc}>{item.description}</Text> : null}
-              {item.confidence !== undefined && <ConfidenceBar confidence={item.confidence} />}
+              {(item.confidenceScore !== undefined || item.confidence !== undefined) && (
+                <ConfidenceBar confidence={item.confidenceScore ?? item.confidence} />
+              )}
 
               {/* Side by side images */}
               {(item.beforeImage || item.afterImage) && (

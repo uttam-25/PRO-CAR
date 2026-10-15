@@ -31,7 +31,7 @@ export const getInspection = (id) =>
 export const uploadBeforeMedia = (id, files) => {
   const formData = new FormData();
   files.forEach((file) => {
-    formData.append('files', {
+    formData.append('media', {
       uri: file.uri,
       name: file.name || `before_${Date.now()}.${file.type === 'video' ? 'mp4' : 'jpg'}`,
       type: file.mimeType || (file.type === 'video' ? 'video/mp4' : 'image/jpeg'),
@@ -48,7 +48,7 @@ export const startReturn = (id) =>
 export const uploadAfterMedia = (id, files) => {
   const formData = new FormData();
   files.forEach((file) => {
-    formData.append('files', {
+    formData.append('media', {
       uri: file.uri,
       name: file.name || `after_${Date.now()}.${file.type === 'video' ? 'mp4' : 'jpg'}`,
       type: file.mimeType || (file.type === 'video' ? 'video/mp4' : 'image/jpeg'),
