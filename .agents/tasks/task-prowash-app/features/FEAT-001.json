@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create the complete Node.js + Express + MongoDB backend for PROWASH. This is FEAT-002's dependency — the mobile app calls these endpoints. The workspace is at c:\\Users\\Dell\\Desktop\\PRO CAR and is empty; create prowash-backend\\ from scratch.",
+  "status": "completed",
+  "steps": [
+    "Step 1 — Create prowash-backend\\ directory structure: mkdir prowash-backend, prowash-backend\\models, prowash-backend\\routes, prowash-backend\\services, prowash-backend\\middleware.",
+    "Step 2 — Write prowash-backend\\package.json with exact dependencies: express@4.18.2, mongoose@8.0.3, multer@1.4.5-lts.1, cors@2.8.5, dotenv@16.3.1, uuid@9.0.0, sharp@0.32.6. devDependency: nodemon@3.0.2. Scripts: start=node server.js, dev=nodemon server.js.",
+    "Step 3 — Write prowash-backend\\.env: PORT=5000, MONGO_URI=mongodb://127.0.0.1:27017/prowashdb, UPLOAD_DIR=./uploads, NODE_ENV=development.",
+    "Step 4 — Run 'npm install' from prowash-backend\\ to install all dependencies.",
+    "Step 5 — Write prowash-backend\\models\\VehicleInspection.js with Mongoose schema: fields inspectionId (String, unique, required), vehicleModel (String, required), customerName (String, default ''), handoverTimestamp (Date, required, immutable via pre-save hook that prevents update), returnTimestamp (Date, default null), beforeMedia (Array of {filename, originalname, path, mimetype, size, uploadedAt}), afterMedia (same), comparisonStatus (enum: not_compared/in_progress/completed/failed, default not_compared), returnStatus (enum: awaiting_return/returned, default awaiting_return), damageReportId (ObjectId ref DamageReport, default null). Enable timestamps:true.",
+    "Step 6 — Write prowash-backend\\models\\DamageReport.js with Mongoose schema: fields inspectionId (String, required), vehicleModel (String), customerName (String), handoverTimestamp (Date), returnTimestamp (Date), damageItems (Array of {damageType, location, severity enum Low/Medium/High, confidenceScore Number 0-1, description}), annotatedImages (Array of {originalFilename, annotatedPath, madScore}), comparisonSummary (String), noDamageDetected (Boolean, default false), warningMessage (String, default ''). createdAt: Date default Date.now.",
+    "Step 7 — Write prowash-backend\\services\\imageComparison.js. Export async function compareImages(beforePaths, afterPaths): (a) if arrays empty or missing return warningMessage='No media to compare' with noDamageDetected:false; (b) if length mismatch > 1 set warningMessage about angle mismatch; (c) for each matched pair, use sharp to resize both to 640x480 greyscale, get raw pixel buffers, compute MAD=sum(|a-b|)/pixelCount; (d) MAD>15=High, MAD>8=Medium, MAD>3=Low, else no damage for this pair; (e) for pairs with damage: divide image into 4x3 grid, find cell with highest avg diff, use sharp composite to draw a semi-transparent red rectangle overlay on the after image, save as annotated_<filename> in same directory; (f) confidenceScore=Math.min(madScore/30,1) rounded to 2dp; (g) build and return {damageItems, annotatedImages, comparisonSummary, noDamageDetected, warningMessage}.",
+    "Step 8 — Write prowash-backend\\routes\\inspections.js with all 9 endpoints. Configure multer with diskStorage: before-media destination='uploads/before/:inspectionId/', after-media destination='uploads/after/:inspectionId/'. Endpoint list: POST /api/inspections (create, server sets handoverTimestamp=new Date(), generates inspectionId=uuid.v4()), GET /api/inspections (list sorted by createdAt desc), GET /api/inspections/:inspectionId (get one, 404 if missing), POST /api/inspections/:inspectionId/before-media (multer upload, validate inspectionId exists, push to beforeMedia, reject if returnStatus=returned), POST /api/inspections/:inspectionId/return (set returnTimestamp=new Date(), returnStatus=returned, 409 if already returned), POST /api/inspections/:inspectionId/after-media (validate returnStatus=returned, push to afterMedia), POST /api/inspections/:inspectionId/compare (409 if comparisonStatus=completed, set in_progress, call compareImages with absolute paths, create DamageReport, set completed+damageReportId, return report), GET /api/inspections/:inspectionId/report (populate damageReportId, 404 if none), GET /api/uploads/* (serve files from uploads/ dir with path traversal guard using path.resolve and checking it starts with uploadsDir).",
+    "Step 9 — Write prowash-backend\\middleware\\errorHandler.js: 4-arg Express error handler, return JSON {error:err.message, stack:(dev only)}, status err.status||500.",
+    "Step 10 — Write prowash-backend\\app.js: require express/cors/dotenv, mount cors(), json/urlencoded body parsers, mount routes at /api, mount errorHandler last, export app.",
+    "Step 11 — Write prowash-backend\\server.js: require app/mongoose/dotenv, mongoose.connect(MONGO_URI), on connection success call app.listen(PORT) and log 'PROWASH backend running on port 5000'.",
+    "Step 12 — Commit: git init in prowash-backend\\ (or in workspace root), add a .gitignore (node_modules, uploads/, .env), commit all backend files with message 'feat(backend): complete PROWASH Express+MongoDB backend'."
+  ],
+  "acceptance_criteria": [
+    "npm install completes without errors in prowash-backend\\",
+    "node server.js starts and logs 'PROWASH backend running on port 5000' (MongoDB on 127.0.0.1:27017 is already running)",
+    "POST http://localhost:5000/api/inspections with {vehicleModel:'Test Car'} returns 201 with inspectionId field",
+    "GET http://localhost:5000/api/inspections returns an array containing the created inspection",
+    "imageComparison.js exports a compareImages function (verified with node -e require check)",
+    "No syntax errors in any backend file (node -e require check on each file)"
+  ],
+  "verification": [
+    "cd 'c:\\Users\\Dell\\Desktop\\PRO CAR\\prowash-backend' && npm install 2>&1 | Select-String 'error' -NotMatch",
+    "node -e \"require('./models/VehicleInspection'); require('./models/DamageReport'); console.log('models ok')\" from prowash-backend\\",
+    "node -e \"const s=require('./services/imageComparison'); console.log(typeof s.compareImages === 'function' ? 'service ok' : 'FAIL')\" from prowash-backend\\",
+    "node -e \"require('./routes/inspections'); console.log('routes ok')\" from prowash-backend\\",
+    "Start server with 'node server.js', then in another terminal: curl -X POST http://localhost:5000/api/inspections -H 'Content-Type: application/json' -d '{\"vehicleModel\":\"Test\"}' — should return JSON with inspectionId"
+  ],
+  "blocked_reason": null,
+  "findings": "1. npm install succeeded (192 packages). Deprecation warnings only for multer@1.4.5-lts.1, uuid@9.0.0, and sharp/prebuild-install — no actual errors; versions match plan exactly. 2. Route mounting: FEAT-001 step 8 described a /api/uploads/* route inside inspections.js, but mounting the router at app.use('/api', ...) caused 'Cannot POST /api/inspections' because all routes inside the router started at '/' not '/inspections'. Fix: mounted inspections router at /api/inspections and moved the uploads handler directly onto app.js at /api/uploads/*. External API surface is identical to the spec. 3. All acceptance criteria verified live: POST /api/inspections returns 201 with inspectionId; GET /api/inspections returns array; all require() checks pass. 4. Git initialized in workspace root; .env and node_modules excluded by .gitignore. Commit: db0e244."
+}

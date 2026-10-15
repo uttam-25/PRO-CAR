@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "docs",
+  "description": "Write the project README and perform the end-to-end smoke test across the full PROWASH workflow. Depends on FEAT-001 and FEAT-002 both being complete. Independent from neither — must run after both.",
+  "status": "pending",
+  "steps": [
+    "Step 1 — Start the backend (npm run dev from prowash-backend\\) and confirm it logs 'PROWASH backend running on port 5000'.",
+    "Step 2 — Start the Expo app (npx expo start --android from prowash-mobile\\) and confirm Metro bundler starts and the app loads on the Android emulator.",
+    "Step 3 — Smoke test flow: (a) Create a new inspection with vehicleModel='Hyundai Creta', customerName='Test Owner'. Take or select a before photo. Press Save. (b) Verify the inspection appears in the History tab. (c) Open the inspection. Press 'Start Return Inspection'. Verify returnTimestamp is displayed. (d) Take or select an after photo. Press 'Compare Before & After'. Wait for analysis. (e) Verify DamageReportScreen loads with either damage items or 'No obvious new damage detected'. (f) Switch to Reports tab and verify the completed inspection appears.",
+    "Step 4 — Fix any integration bugs found during the smoke test (missing navigation params, wrong URL construction for annotated images, CORS errors, etc.).",
+    "Step 5 — Write c:\\Users\\Dell\\Desktop\\PRO CAR\\README.md with these sections: Prerequisites (Node v24+, npm, MongoDB local on 27017, Android emulator or physical device with Expo Go); Backend setup (cd prowash-backend && npm install && npm run dev); Mobile setup (cd prowash-mobile && npx expo start --android); Physical device note (change 10.0.2.2 to local machine IP in src/services/api.js); Full API reference (all 9 endpoints with method, path, request body/params, response shape); AI comparison explanation (sharp pixel-diff MAD scoring, result labeling as 'suspected damage', clearer-photos warning); Environment variables reference (.env fields and defaults).",
+    "Step 6 — Commit README: git add README.md && git commit -m 'docs: add README with setup, API reference, and AI explanation'."
+  ],
+  "acceptance_criteria": [
+    "Backend starts and responds to POST /api/inspections without error",
+    "Mobile app loads on Android emulator without red screen",
+    "Full handover-to-return-to-compare flow completes end-to-end without unhandled errors",
+    "DamageReportScreen renders (either damage items or no-damage banner)",
+    "README.md exists at c:\\Users\\Dell\\Desktop\\PRO CAR\\README.md with all documented sections"
+  ],
+  "verification": [
+    "curl http://localhost:5000/api/inspections should return a JSON array",
+    "README.md file exists and contains 'Prerequisites', 'Backend setup', 'API reference' sections"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
